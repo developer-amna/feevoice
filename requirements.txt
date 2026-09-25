@@ -5,3 +5,5 @@ flask-sock
 groq
 python-dotenv
 gunicorn
+gevent
+packaging
