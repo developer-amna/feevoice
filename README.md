@@ -63,7 +63,7 @@ Students in Pakistan often have to visit the bank or navigate confusing portals 
 - **Backend**: Python, asyncio, websockets, Flask
 - **Frontend**: HTML/CSS/JavaScript (polled live dashboard)
 
-## 🚀 How to Run
+## 🚀 How to Run Locally
 
 1. Clone this repository and navigate into it:
 
@@ -80,7 +80,7 @@ source venv/bin/activate # Mac/Linux
 
 3. Install dependencies:
 
-pip install websockets sounddevice numpy groq python-dotenv pyttsx3 flask
+pip install -r requirements.txt
 
 
 4. Create a `.env` file in the project root with your API keys:
@@ -94,18 +94,8 @@ GROQ_API_KEY=your_groq_key
 python main.py
 
 
-6. Open your browser to `http://localhost:5000` and start speaking!
+6. Open your browser to `http://localhost:5000`, click **"Start Listening"**, allow microphone access, and start speaking!
 
-## 🧪 Try It
+## 🌐 Live Demo
 
-- "What's my fee status? My name is Ali Khan, roll number BSCS-021."
-- "Can you generate a payment link for me?"
-- "Remind me 5 days before my due date."
-
-## 📌 Note
-
-This demo uses a mock student database (`students.json`) with sample records for demonstration purposes. In a production setting, this would connect to a real institutional database.
-
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE) file.
+This app runs directly in the browser — the microphone is captured via the Web Audio API and speech output uses the browser's built-in speech synthesis, so it works both locally and when deployed online.

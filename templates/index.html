@@ -33,12 +33,14 @@
       background: #38bdf8; margin-top: 20px;
       display: flex; align-items: center; justify-content: center;
       font-size: 32px; animation: pulse 2s infinite;
-      transition: background 0.3s;
+      transition: background 0.3s; cursor: pointer; border: none;
     }
     .mic.thinking { background: #facc15; animation: none; }
     .mic.speaking { background: #4ade80; }
-    .state-label {
-      margin-top: 8px; font-size: 14px; color: #94a3b8; text-transform: uppercase;
+    .state-label { margin-top: 8px; font-size: 14px; color: #94a3b8; text-transform: uppercase; }
+    .start-btn {
+      margin-top: 20px; padding: 10px 20px; border-radius: 8px; border: none;
+      background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; font-size: 15px;
     }
     @keyframes pulse {
       0% { box-shadow: 0 0 0 0 rgba(56,189,248,0.5); }
@@ -49,12 +51,13 @@
 </head>
 <body>
   <h1>🎓 FeeVoice</h1>
-  <div class="mic" id="mic">🎤</div>
-  <div class="state-label" id="stateLabel">Listening</div>
+  <button class="start-btn" id="startBtn">🎤 Start Listening</button>
+  <div class="mic" id="mic" style="display:none;">🎤</div>
+  <div class="state-label" id="stateLabel" style="display:none;">Listening</div>
 
   <div class="box">
     <div class="label">You said</div>
-    <div class="transcript" id="transcript">Listening...</div>
+    <div class="transcript" id="transcript">Click "Start Listening" to begin</div>
   </div>
 
   <div class="box">
@@ -95,7 +98,59 @@
     }
     setInterval(poll, 1000);
     poll();
+
+    let ws;
+    let audioContext;
+    let processor;
+    let micStream;
+    let isSpeaking = false;
+
+    function floatTo16BitPCM(float32Array) {
+      const buffer = new ArrayBuffer(float32Array.length * 2);
+      const view = new DataView(buffer);
+      for (let i = 0; i < float32Array.length; i++) {
+        let s = Math.max(-1, Math.min(1, float32Array[i]));
+        view.setInt16(i * 2, s < 0 ? s * 0x8000 : s * 0x7fff, true);
+      }
+      return buffer;
+    }
+
+    document.getElementById("startBtn").addEventListener("click", async () => {
+      document.getElementById("startBtn").style.display = "none";
+      document.getElementById("mic").style.display = "flex";
+      document.getElementById("stateLabel").style.display = "block";
+
+      const protocol = location.protocol === "https:" ? "wss:" : "ws:";
+      ws = new WebSocket(protocol + "//" + location.host + "/audio");
+
+      ws.onmessage = (event) => {
+        const msg = JSON.parse(event.data);
+        if (msg.type === "speak") {
+          const utterance = new SpeechSynthesisUtterance(msg.text);
+          utterance.lang = "en-US";
+          isSpeaking = true;
+          utterance.onend = () => { isSpeaking = false; };
+          utterance.onerror = () => { isSpeaking = false; };
+          speechSynthesis.speak(utterance);
+        }
+      };
+
+      micStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioContext = new AudioContext({ sampleRate: 16000 });
+      const source = audioContext.createMediaStreamSource(micStream);
+      processor = audioContext.createScriptProcessor(4096, 1, 1);
+
+      processor.onaudioprocess = (e) => {
+        if (ws.readyState === WebSocket.OPEN && !isSpeaking) {
+          const input = e.inputBuffer.getChannelData(0);
+          const pcm = floatTo16BitPCM(input);
+          ws.send(pcm);
+        }
+      };
+
+      source.connect(processor);
+      processor.connect(audioContext.destination);
+    });
   </script>
-  
 </body>
 </html>

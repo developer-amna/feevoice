@@ -1,0 +1,7 @@
+websockets
+websocket-client
+flask
+flask-sock
+groq
+python-dotenv
+gunicorn
