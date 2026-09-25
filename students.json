@@ -1,0 +1,26 @@
+{
+  "ali khan": {
+    "roll_number": "BSCS-021",
+    "program": "BS Computer Science",
+    "total_fee": 85000,
+    "paid": 60000,
+    "due": 25000,
+    "due_date": "October 10, 2026"
+  },
+  "sara ahmed": {
+    "roll_number": "BBA-014",
+    "program": "BBA",
+    "total_fee": 70000,
+    "paid": 70000,
+    "due": 0,
+    "due_date": null
+  },
+  "usman tariq": {
+    "roll_number": "BSSE-033",
+    "program": "BS Software Engineering",
+    "total_fee": 90000,
+    "paid": 30000,
+    "due": 60000,
+    "due_date": "September 30, 2026"
+  }
+}

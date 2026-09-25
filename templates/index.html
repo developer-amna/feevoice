@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>FeeVoice</title>
+  <style>
+    body {
+      font-family: -apple-system, Arial, sans-serif;
+      background: #0f172a;
+      color: #e2e8f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 40px 20px;
+    }
+    h1 { color: #38bdf8; }
+    .box {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 20px;
+      width: 100%;
+      max-width: 480px;
+      margin-top: 16px;
+    }
+    .label { font-size: 13px; color: #94a3b8; text-transform: uppercase; margin-bottom: 6px; }
+    .transcript { font-size: 18px; min-height: 24px; }
+    .reply { font-size: 18px; color: #4ade80; min-height: 24px; }
+    .fee-card { display: none; }
+    .fee-card.show { display: block; }
+    .fee-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #334155; }
+    .mic {
+      width: 80px; height: 80px; border-radius: 50%;
+      background: #38bdf8; margin-top: 20px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 32px; animation: pulse 2s infinite;
+      transition: background 0.3s;
+    }
+    .mic.thinking { background: #facc15; animation: none; }
+    .mic.speaking { background: #4ade80; }
+    .state-label {
+      margin-top: 8px; font-size: 14px; color: #94a3b8; text-transform: uppercase;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(56,189,248,0.5); }
+      70% { box-shadow: 0 0 0 20px rgba(56,189,248,0); }
+      100% { box-shadow: 0 0 0 0 rgba(56,189,248,0); }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎓 FeeVoice</h1>
+  <div class="mic" id="mic">🎤</div>
+  <div class="state-label" id="stateLabel">Listening</div>
+
+  <div class="box">
+    <div class="label">You said</div>
+    <div class="transcript" id="transcript">Listening...</div>
+  </div>
+
+  <div class="box">
+    <div class="label">FeeVoice replied</div>
+    <div class="reply" id="reply">Say hello to get started!</div>
+  </div>
+
+  <div class="box fee-card" id="feeCard">
+    <div class="label">Fee Details</div>
+    <div class="fee-row"><span>Program</span><span id="feeProgram"></span></div>
+    <div class="fee-row"><span>Total Fee</span><span id="feeTotal"></span></div>
+    <div class="fee-row"><span>Paid</span><span id="feePaid"></span></div>
+    <div class="fee-row"><span>Due</span><span id="feeDue"></span></div>
+  </div>
+
+  <script>
+    async function poll() {
+      const res = await fetch("/status");
+      const data = await res.json();
+
+      const mic = document.getElementById("mic");
+      const stateLabel = document.getElementById("stateLabel");
+      mic.className = "mic";
+      if (data.state === "thinking") { mic.classList.add("thinking"); stateLabel.innerText = "Thinking"; }
+      else if (data.state === "speaking") { mic.classList.add("speaking"); stateLabel.innerText = "Speaking"; }
+      else { stateLabel.innerText = "Listening"; }
+
+      document.getElementById("transcript").innerText = data.transcript || "Listening...";
+      document.getElementById("reply").innerText = data.agent_reply || "";
+      const card = document.getElementById("feeCard");
+      if (data.fee_card && !data.fee_card.error) {
+        card.classList.add("show");
+        document.getElementById("feeProgram").innerText = data.fee_card.program || "-";
+        document.getElementById("feeTotal").innerText = data.fee_card.total_fee || "-";
+        document.getElementById("feePaid").innerText = data.fee_card.paid || "-";
+        document.getElementById("feeDue").innerText = data.fee_card.due || "-";
+      }
+    }
+    setInterval(poll, 1000);
+    poll();
+  </script>
+  
+</body>
+</html>
