@@ -98,4 +98,8 @@ python main.py
 
 ## 🌐 Live Demo
 
+Try it live: **[Live App Link](https://conclude-manly-alfalfa.ngrok-free.dev)**
+
 This app runs directly in the browser — the microphone is captured via the Web Audio API and speech output uses the browser's built-in speech synthesis, so it works both locally and when deployed online.
+
+**Note**: This demo link is active while the developer's local server is running. Please contact for a live demonstration if the link is inactive.
